@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload Example</title>
+</head>
+<body>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+
+    <script>
+        function createUUID() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/create", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var uuid = xhr.responseText;
+                    var extension = document.getElementById("upload-form").elements.namedItem("file").value.split(".").pop();
+                    uploadFile(uuid, extension);
+                }
+            };
+            xhr.send();
+        }
+
+        function uploadFile(uuid, extension) {
+            var form = document.getElementById("upload-form");
+            var formData = new FormData(form);
+            formData.append("uuid", uuid);
+            formData.append("extension", "." + extension);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    checkStatus(uuid);
+                }
+            };
+            xhr.send(formData);
+        }
+
+        function checkStatus(uuid) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/check?uuid=" + uuid, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    if (xhr.responseText === "done") {
+                        downloadFile(uuid);
+                    } else {
+                        setTimeout(function() { checkStatus(uuid); }, 1000);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function downloadFile(uuid) {
+            window.location.href = "/download?uuid=" + uuid;
+        }
+
+        createUUID();
+    </script>
+</body>
+</html>
