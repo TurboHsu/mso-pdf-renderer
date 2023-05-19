@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"mso-pdf-renderer/manager"
@@ -11,30 +12,30 @@ import (
 
 var downloadSemaphore = make(chan struct{}, 1)
 
+func init() {
+	// Check whether /static folder exists
+	if _, err := os.Stat(process.RunningPath + "/static"); os.IsNotExist(err) {
+		log.Panicln("[E] /static folder not found, exiting")
+	}
+}
+
 func ListenAndServe(addr string) {
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/download", downloadHandler)
 	http.HandleFunc("/create", createHandler)
 	http.HandleFunc("/check", checkHandler)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Reads web/index.html
-		f, err := os.Open(process.RunningPath + "/web/index.html")
-		if err != nil {
-			log.Println("[E] failed to open index.html: ", err)
-			return
-		}
-		defer f.Close()
-		io.Copy(w, f)
-	})
+	http.HandleFunc("/", http.FileServer(http.Dir(process.RunningPath+"/static")).ServeHTTP)
 	http.ListenAndServe(addr, nil)
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-
+	var resp APIResponseStruct
 	r.ParseForm()
 	extension := r.FormValue("extension")
 	if extension == "" {
-		w.Write([]byte("Invalid extension"))
+		resp.Status = "bad"
+		resp.Message = "Invalid extension"
+		w.Write(marshalResponse(resp))
 		return
 	}
 	uuid := manager.GenerateUUID()
@@ -42,34 +43,45 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		UUID:          uuid,
 		FileExtension: "." + extension,
 	})
-	w.Write([]byte(uuid))
-
+	resp.Status = "ok"
+	resp.Message = uuid
+	w.Write(marshalResponse(resp))
 }
 
 func checkHandler(w http.ResponseWriter, r *http.Request) {
-
+	var resp APIResponseStruct
 	r.ParseForm()
 	uuid := r.FormValue("uuid")
 	if !manager.DoesUUIDExist(uuid) {
-		w.Write([]byte("Invalid uuid"))
+		resp.Status = "bad"
+		resp.Message = "Invalid uuid"
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(marshalResponse(resp))
 		return
 	}
 
-	if _, err := os.Stat(process.RunningPath + "/cache/" + uuid + manager.FindRoutine(uuid).FileExtension); os.IsNotExist(err) {
-		w.Write([]byte("Not done yet"))
+	if _, err := os.Stat(process.RunningPath + "/cache/" + uuid + manager.FindRoutine(uuid).FileExtension); !os.IsNotExist(err) {
+		resp.Status = "wait"
+		resp.Message = "Not done yet"
+		w.WriteHeader(http.StatusAccepted)
+		w.Write(marshalResponse(resp))
 		return
 	}
 
-	w.Write([]byte("Done"))
-
+	resp.Status = "ok"
+	resp.Message = "done"
+	w.Write(marshalResponse(resp))
 }
 
 func downloadHandler(w http.ResponseWriter, r *http.Request) {
-
+	var resp APIResponseStruct
 	r.ParseForm()
 	uuid := r.FormValue("uuid")
 	if !manager.DoesUUIDExist(uuid) {
-		w.Write([]byte("Invalid uuid"))
+		resp.Status = "bad"
+		resp.Message = "Invalid uuid"
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(marshalResponse(resp))
 		return
 	}
 
@@ -94,25 +106,35 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	var resp APIResponseStruct
 	r.ParseForm()
 	uuid := r.FormValue("uuid")
 	if !manager.DoesUUIDExist(uuid) {
-		w.Write([]byte("Invalid uuid"))
+		resp.Status = "bad"
+		resp.Message = "Invalid uuid"
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(marshalResponse(resp))
 		return
 	}
 
-	extension := r.FormValue("extension")
+	extension := manager.FindRoutine(uuid).FileExtension
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		w.Write([]byte("Upload failed: " + err.Error()))
 		log.Println("[E] failed to upload file: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		resp.Status = "bad"
+		resp.Message = "Upload failed: " + err.Error()
+		w.Write(marshalResponse(resp))
 		return
 	}
 	defer file.Close()
 
 	fileLocal, err := os.Create(process.RunningPath + "/cache/" + uuid + extension)
 	if err != nil {
-		w.Write([]byte("Upload failed: " + err.Error()))
+		resp.Status = "bad"
+		resp.Message = "Upload failed: " + err.Error()
+		w.Write(marshalResponse(resp))
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("[E] failed to create file: ", err)
 		return
 	}
@@ -120,7 +142,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = io.Copy(fileLocal, file)
 	if err != nil {
-		w.Write([]byte("Upload failed: " + err.Error()))
+		resp.Status = "bad"
+		resp.Message = "Upload failed: " + err.Error()
+		w.Write(marshalResponse(resp))
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("[E] failed to copy file: ", err)
 		return
 	}
@@ -130,7 +155,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		n, err := file.Read(buf)
 		if err != nil && err != io.EOF {
-			w.Write([]byte("Upload failed: " + err.Error()))
+			resp.Status = "bad"
+			resp.Message = "Upload failed: " + err.Error()
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(marshalResponse(resp))
 			log.Println("[E] failed to read file: ", err)
 			return
 		}
@@ -139,8 +167,18 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("Upload success"))
-
+	resp.Status = "ok"
+	resp.Message = "Upload success"
+	w.Write(marshalResponse(resp))
 	// Call converter to convert
 	go process.ConvertPPT(process.RunningPath+"/cache/"+uuid+extension, process.RunningPath+"/cache/"+uuid+".pdf")
+}
+
+func marshalResponse(i APIResponseStruct) []byte {
+	b, err := json.Marshal(i)
+	if err != nil {
+		log.Println("[E] failed to marshal response: ", err)
+		return nil
+	}
+	return b
 }

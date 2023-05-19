@@ -12,13 +12,12 @@ func init() {
 	RunningPath, _ = os.Getwd()
 	// Judge whether script file exists
 	if _, err := os.Stat(RunningPath + "/scripts/ppt.vbs"); os.IsNotExist(err) {
-		panic("script file not found, exiting")
+		log.Panicln("[E] script file not found, exiting")
 	}
 
-	// Check whether cache folder exists
-	if _, err := os.Stat(RunningPath + "/cache"); os.IsNotExist(err) {
-		os.Mkdir(RunningPath+"/cache", os.ModePerm)
-	}
+	// Clear cache
+	os.RemoveAll(RunningPath + "/cache")
+	os.Mkdir(RunningPath+"/cache", os.ModePerm)
 }
 
 func ConvertPPT(pptPath string, pdfPath string) {
@@ -46,5 +45,5 @@ func ConvertPPT(pptPath string, pdfPath string) {
 	if err != nil {
 		log.Println("[E] failed to delete ppt file: ", err)
 	}
-	
+
 }
