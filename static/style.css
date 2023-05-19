@@ -1,0 +1,149 @@
+body {
+    background-color: #222222;
+}
+
+
+#button {
+    height: 15vh;
+    width: 20vw;
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    font-size: xxx-large;
+    animation: rotation 4s infinite linear;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    outline: none;
+    color: #fff;
+    background: #111;
+    cursor: pointer;
+    border-radius: 20%;
+}
+
+@keyframes goto {
+    from {
+        top: 40%;
+        left: 40%;
+    }
+    to {
+        top: 20%;
+        left: 20%;
+    }
+}
+
+@keyframes end {
+    from {
+        top: 70%;
+        left: 70%;
+    }
+    to {
+        top: 40%;
+        left: 40%;
+    }
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bouncing {
+    0% {
+        top: 20%;
+        left: 20%;
+    }
+    25% {
+        top: 20%;
+        left: calc(100vw - 30%);
+    }
+    50% {
+        top: calc(100vh - 30%);
+        left: calc(100vw - 30%);
+    }
+    75% {
+        top: calc(100vh - 30%);
+        left: 20%;
+    }
+    100% {
+        top: 20%;
+        left: 20%;
+    }
+}
+
+.cool-effect:before {
+    content: '';
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    position: absolute;
+    top: -2px;
+    left:-2px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing 20s linear infinite;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+    border-radius: 10px;
+}
+
+.cool-effect:active {
+    color: #000
+}
+
+.cool-effect:active:after {
+    background: transparent;
+}
+
+.cool-effect:hover:before {
+    opacity: 1;
+}
+
+.cool-effect:after {
+    z-index: -1;
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #111;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+}
+
+@keyframes glowing {
+    0% { background-position: 0 0; }
+    50% { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+}
+
+input[type=file]::file-selector-button {
+    margin-right: 20px;
+    border: none;
+    background: #084cdf;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+}
+
+input[type=file]::file-selector-button:hover {
+    background: #0d45a5;
+}
+
+input[type=file] {
+    bottom: 10vh;
+    right: 10vw;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
