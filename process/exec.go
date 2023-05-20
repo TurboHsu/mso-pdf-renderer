@@ -2,6 +2,7 @@ package process
 
 import (
 	"log"
+	"mso-pdf-renderer/manager"
 	"os"
 	"os/exec"
 )
@@ -20,7 +21,28 @@ func init() {
 	os.Mkdir(RunningPath+"/cache", os.ModePerm)
 }
 
-func ConvertPPT(pptPath string, pdfPath string) {
+func Convert(uuid string) {
+	// Find routine
+	routine := manager.FindRoutine(uuid)
+	if routine == nil {
+		log.Println("[E] invalid uuid: ", uuid)
+		return
+	}
+
+	// Check whether file exists
+	if _, err := os.Stat(RunningPath + "/cache/" + uuid + routine.FileExtension); os.IsNotExist(err) {
+		log.Println("[E] file not found: ", RunningPath+"/cache/"+uuid+routine.FileExtension)
+		return
+	}
+
+	// Convert
+	switch routine.FileExtension {
+	case ".ppt", ".pptx":
+		convertPPT(RunningPath+"/cache/"+uuid+routine.FileExtension, RunningPath+"/cache/"+uuid+".pdf")
+	}
+}
+
+func convertPPT(pptPath string, pdfPath string) {
 	// Check whether pptPath exists
 	if _, err := os.Stat(pptPath); os.IsNotExist(err) {
 		log.Println("[E] ppt file not found: ", pptPath)

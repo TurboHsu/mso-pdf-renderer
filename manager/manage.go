@@ -41,3 +41,13 @@ func RemoveUUID(uuid string) {
 		}
 	}
 }
+
+func CheckExtensionValidation(extension string) bool {
+	// Check whether extension is valid
+	switch extension {
+	case ".ppt", ".pptx":
+		return true
+	default:
+		return false
+	}
+}

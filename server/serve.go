@@ -32,7 +32,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	var resp APIResponseStruct
 	r.ParseForm()
 	extension := r.FormValue("extension")
-	if extension == "" {
+	if !manager.CheckExtensionValidation("." + extension) {
 		resp.Status = "bad"
 		resp.Message = "Invalid extension"
 		w.Write(marshalResponse(resp))
@@ -170,8 +170,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	resp.Status = "ok"
 	resp.Message = "Upload success"
 	w.Write(marshalResponse(resp))
+
 	// Call converter to convert
-	go process.ConvertPPT(process.RunningPath+"/cache/"+uuid+extension, process.RunningPath+"/cache/"+uuid+".pdf")
+	go process.Convert(uuid)
 }
 
 func marshalResponse(i APIResponseStruct) []byte {

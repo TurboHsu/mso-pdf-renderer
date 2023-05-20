@@ -58,13 +58,13 @@ async function doSomething() {
     }
 
     button.textContent = "Doing stuff"
-    animation()
     const resUUID = await createUUID();
     const uuid = await resUUID.json();
     if (uuid.status === "ok") {
         const resUpload = await uploadFile(uuid.message);
         const ul = await resUpload.json();
         if (ul.status === "ok") {
+            animation()
             while (true) {
                 const resCheck = await checkStatus(uuid.message);
                 const check = await resCheck.json();
@@ -82,9 +82,11 @@ async function doSomething() {
                 }
             }
         } else {
+            button.textContent = ul.message
             console.log("[E] Upload failed: " + ul.message )
         }
     } else {
+        button.textContent = uuid.message
         console.log("[E] Error creating UUID: " + uuid.message)
     }
 }
