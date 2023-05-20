@@ -2,10 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/TurboHsu/mso-pdf-renderer/manager"
+	"github.com/TurboHsu/mso-pdf-renderer/process"
 	"io"
 	"log"
-	"mso-pdf-renderer/manager"
-	"mso-pdf-renderer/process"
 	"net/http"
 	"os"
 )

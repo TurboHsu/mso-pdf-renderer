@@ -1,8 +1,8 @@
 package process
 
 import (
+	"github.com/TurboHsu/mso-pdf-renderer/manager"
 	"log"
-	"mso-pdf-renderer/manager"
 	"os"
 	"os/exec"
 )

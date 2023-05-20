@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"mso-pdf-renderer/server"
+	"github.com/TurboHsu/mso-pdf-renderer/server"
 )
 
 func main() {
