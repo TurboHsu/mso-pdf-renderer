@@ -33,3 +33,8 @@ IDK why i cannot call microsoft office as a service ~~Maybe i just sucks~~
 ### Something else
 
  - It works anyways, but its junk XD
+
+### Credits
+
+I copied some code from here
+ - https://www.thoughtasylum.com/2012/12/20/VBScript-to-Convert-Microsoft-Office-Files-(Word,-Excel,-PowerPoint)-to-PDF/

@@ -25,6 +25,7 @@ func ListenAndServe(addr string) {
 	http.HandleFunc("/create", createHandler)
 	http.HandleFunc("/check", checkHandler)
 	http.HandleFunc("/", http.FileServer(http.Dir(process.RunningPath+"/static")).ServeHTTP)
+	log.Println("[I] listening on ", addr)
 	http.ListenAndServe(addr, nil)
 }
 
@@ -32,7 +33,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	var resp APIResponseStruct
 	r.ParseForm()
 	extension := r.FormValue("extension")
-	if !manager.CheckExtensionValidation("." + extension) {
+	_, extensionValidation := manager.CheckExtensionValidation("." + extension)
+	if !extensionValidation {
 		resp.Status = "bad"
 		resp.Message = "Invalid extension"
 		w.Write(marshalResponse(resp))

@@ -42,12 +42,12 @@ func RemoveUUID(uuid string) {
 	}
 }
 
-func CheckExtensionValidation(extension string) bool {
+func CheckExtensionValidation(extension string) (string, bool) {
 	// Check whether extension is valid
 	switch extension {
-	case ".ppt", ".pptx":
-		return true
+	case ".ppt", ".pptx", ".doc", ".docx", ".xls", ".xlsx":
+		return "mso", true
 	default:
-		return false
+		return "", false
 	}
 }

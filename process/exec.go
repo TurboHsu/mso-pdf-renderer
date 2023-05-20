@@ -12,7 +12,7 @@ var RunningPath string
 func init() {
 	RunningPath, _ = os.Getwd()
 	// Judge whether script file exists
-	if _, err := os.Stat(RunningPath + "/scripts/ppt.vbs"); os.IsNotExist(err) {
+	if _, err := os.Stat(RunningPath + "/scripts/mso-convert.vbs"); os.IsNotExist(err) {
 		log.Panicln("[E] script file not found, exiting")
 	}
 
@@ -36,21 +36,25 @@ func Convert(uuid string) {
 	}
 
 	// Convert
-	switch routine.FileExtension {
-	case ".ppt", ".pptx":
-		convertPPT(RunningPath+"/cache/"+uuid+routine.FileExtension, RunningPath+"/cache/"+uuid+".pdf")
+	extensionType, validation := manager.CheckExtensionValidation(routine.FileExtension)
+	if validation {
+		switch extensionType {
+		case "mso":
+			convertMSO(RunningPath+"/cache/"+uuid+routine.FileExtension, RunningPath+"/cache/"+uuid+".pdf")
+		}
 	}
 }
 
-func convertPPT(pptPath string, pdfPath string) {
-	// Check whether pptPath exists
-	if _, err := os.Stat(pptPath); os.IsNotExist(err) {
-		log.Println("[E] ppt file not found: ", pptPath)
+func convertMSO(originalFilePath string, pdfPath string) {
+	log.Println("[I] converting: ", originalFilePath)
+	// Check whether originalFilePath exists
+	if _, err := os.Stat(originalFilePath); os.IsNotExist(err) {
+		log.Println("[E] ppt file not found: ", originalFilePath)
 		return
 	}
 
 	// Execute script
-	cmd := exec.Command("cscript", RunningPath+"/scripts/ppt.vbs", pptPath, pdfPath)
+	cmd := exec.Command("cscript", RunningPath+"/scripts/mso-convert.vbs", originalFilePath)
 	err := cmd.Run()
 	if err != nil {
 		log.Println("[E] failed to execute script: ", err)
@@ -63,9 +67,8 @@ func convertPPT(pptPath string, pdfPath string) {
 	}
 
 	// Delete ppt file
-	err = os.Remove(pptPath)
+	err = os.Remove(originalFilePath)
 	if err != nil {
-		log.Println("[E] failed to delete ppt file: ", err)
+		log.Println("[E] failed to delete original file: ", err)
 	}
-
 }
