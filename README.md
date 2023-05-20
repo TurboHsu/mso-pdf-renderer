@@ -1,6 +1,6 @@
 ## mso-pdf-renderer
 #### Remote Microsoft Office PDF Renderer
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/TurboHsu/mso-pdf-renderer)](https://goreportcard.com/report/github.com/TurboHsu/mso-pdf-renderer)
 ---
 
 ### Introduction
