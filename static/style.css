@@ -2,6 +2,28 @@ body {
     background-color: #222222;
 }
 
+#download {
+    position: absolute;
+    bottom: 10vh;
+    left: 10vw;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    outline: none;
+    margin-right: 20px;
+    background: #084cdf;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+}
+
+#download:hover {
+    background: #0d45a5;
+}
 
 #button {
     height: 15vh;
@@ -18,7 +40,7 @@ body {
     border: none;
     outline: none;
     color: #fff;
-    background: #111;
+    background-color: #0d45a5;
     cursor: pointer;
     border-radius: 20%;
 }

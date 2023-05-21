@@ -10,8 +10,6 @@ import (
 	"os"
 )
 
-var downloadSemaphore = make(chan struct{}, 1)
-
 func init() {
 	// Check whether /static folder exists
 	if _, err := os.Stat(process.RunningPath + "/static"); os.IsNotExist(err) {
@@ -92,18 +90,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	// Limit the number of concurrent downloads to one
-	downloadSemaphore <- struct{}{}
-	defer func() { <-downloadSemaphore }()
-
-	ctx := r.Context()
-	go func() {
-		<-ctx.Done()
-		// Do something when the client has disconnected
-		manager.RemoveUUID(uuid)
-		os.Remove(process.RunningPath + "/cache/" + filename)
-	}()
-
+	// Serve the file
 	http.ServeFile(w, r, process.RunningPath+"/cache/"+filename)
 }
 

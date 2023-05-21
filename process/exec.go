@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 var RunningPath string
@@ -19,6 +20,9 @@ func init() {
 	// Clear cache
 	os.RemoveAll(RunningPath + "/cache")
 	os.Mkdir(RunningPath+"/cache", os.ModePerm)
+
+	// Tell manager the running path
+	manager.RunningPath = RunningPath
 }
 
 func Convert(uuid string) {
@@ -43,6 +47,7 @@ func Convert(uuid string) {
 			convertMSO(RunningPath+"/cache/"+uuid+routine.FileExtension, RunningPath+"/cache/"+uuid+".pdf")
 		}
 	}
+	(*routine).LifeCycleStart = time.Now().Unix()
 }
 
 func convertMSO(originalFilePath string, pdfPath string) {
@@ -71,4 +76,6 @@ func convertMSO(originalFilePath string, pdfPath string) {
 	if err != nil {
 		log.Println("[E] failed to delete original file: ", err)
 	}
+
+	log.Println("[I] converted: ", pdfPath)
 }

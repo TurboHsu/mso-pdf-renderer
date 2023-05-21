@@ -1,3 +1,6 @@
+var uuid = ""
+var originalFilename = ""
+
 async function createUUID() {
     var formData = new FormData();
     var extension = document.getElementById("upload-form").elements.namedItem("file").value.split(".").pop();
@@ -44,7 +47,7 @@ function downloadFile(url, fileName){
             aElement.click();
             URL.revokeObjectURL(href);
         });
-};
+}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -59,7 +62,7 @@ async function doSomething() {
 
     button.textContent = "Doing stuff"
     const resUUID = await createUUID();
-    const uuid = await resUUID.json();
+    uuid = await resUUID.json();
     if (uuid.status === "ok") {
         const resUpload = await uploadFile(uuid.message);
         const ul = await resUpload.json();
@@ -72,10 +75,7 @@ async function doSomething() {
                 {
                     await sleep(500);
                 } else {
-                    // Get original file name
-                    originalPathString = document.getElementById("upload-form").elements.namedItem("file").value.split(".").shift()
-                    originalFilename = originalPathString.split(/(\\|\/)/g).pop()
-                    downloadFile('/download?uuid=' + uuid.message, originalFilename + '.pdf')
+                    await startDownload()
                     button.textContent = "Done stuff"
                     await animationTerminator()
                     break
@@ -101,4 +101,16 @@ async function animation() {
     button.style.animation = "rotation 4s infinite linear, goto 1s 1 ease-in-out"
     await sleep(1000)
     button.style.animation = "rotation 4s infinite linear, bouncing 4s infinite ease-in-out"
+}
+
+async function startDownload() {
+    if (uuid === "") {
+        button.textContent = "Select a file to do stuff"
+        return
+    }
+    // Get original file name
+    originalPathString = document.getElementById("upload-form").elements.namedItem("file").value.split(".").shift()
+    originalFilename = originalPathString.split(/(\\|\/)/g).pop()
+
+    downloadFile('/download?uuid=' + uuid.message, originalFilename + '.pdf')
 }
