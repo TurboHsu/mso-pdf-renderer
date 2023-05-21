@@ -104,7 +104,7 @@ async function animation() {
 }
 
 async function startDownload() {
-    if (uuid === "") {
+    if (uuid.message === "" || uuid.status === "bad") {
         button.textContent = "Select a file to do stuff"
         return
     }
