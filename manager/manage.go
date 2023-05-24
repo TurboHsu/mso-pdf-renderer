@@ -78,7 +78,7 @@ func CacheLifeCycleRoutine(lifecycle int64, interval int64) {
 
 		// Check whether cache is expired
 		for _, routine := range Routines {
-			if time.Now().Unix()-routine.LifeCycleStart > lifecycle {
+			if routine.LifeCycleStart != 0 && time.Now().Unix()-routine.LifeCycleStart > lifecycle {
 				log.Println("[I] removing expired uuid: ", routine.UUID)
 				RemoveUUID(routine.UUID)
 			}
