@@ -109,8 +109,8 @@ async function startDownload() {
         return
     }
     // Get original file name
-    originalPathString = document.getElementById("upload-form").elements.namedItem("file").value.split(".").shift()
-    originalFilename = originalPathString.split(/(\\|\/)/g).pop()
-
-    downloadFile('/download?uuid=' + uuid.message, originalFilename + '.pdf')
+    const originalFilename = document.querySelector('input[type="file"]').files[0].name;
+    const filenameWithoutExtension = originalFilename.split('.').slice(0, -1).join('.');
+    // Download file
+    downloadFile('/download?uuid=' + uuid.message, filenameWithoutExtension + '.pdf')
 }
