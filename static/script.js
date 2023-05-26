@@ -1,9 +1,9 @@
-var uuid = ""
-var originalFilename = ""
+let uuid = ""
+let originalFilename = ""
 
 async function createUUID() {
-    var formData = new FormData();
-    var extension = document.getElementById("upload-form").elements.namedItem("file").value.split(".").pop();
+    let formData = new FormData();
+    const extension = document.getElementById("upload-form").elements.namedItem("file").value.split(".").pop();
     formData.set("extension", extension)
     return await fetch(
        '/create?extension=' + extension,
@@ -14,7 +14,7 @@ async function createUUID() {
 
 async function uploadFile(uuid) {
     const file = document.querySelector('input[type="file"]');
-    var formData = new FormData();
+    let formData = new FormData();
     formData.append('file', file.files[0]);
     return await fetch(
         '/upload?uuid=' + uuid,
@@ -92,12 +92,12 @@ async function doSomething() {
 }
 
 async function animationTerminator() {
-    var button = document.getElementById('button')
+    const button = document.getElementById('button')
     button.style.animation = "rotation 4s infinite linear, end 1s 1 ease-in-out"
 }
 
 async function animation() {
-    var button = document.getElementById('button');
+    const button = document.getElementById('button');
     button.style.animation = "rotation 4s infinite linear, goto 1s 1 ease-in-out"
     await sleep(1000)
     button.style.animation = "rotation 4s infinite linear, bouncing 4s infinite ease-in-out"
